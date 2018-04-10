@@ -44,7 +44,7 @@ export default {
     },
     parseLiteral(ast) {
       if (ast.kind === Kind.INT) {
-        return parseInt(ast.value, 10); // ast value is always in string format
+        return ast.value;
       }
       return null;
     },
