@@ -1,10 +1,5 @@
-import { Model, model } from "mongoose";
-import { createdAtModifier } from "../plugins";
-import {
-  channelSchema,
-  IChannel,
-  IChannelDocument
-} from "./definitions/channels";
+import { Model, model } from 'mongoose';
+import { channelSchema, IChannel, IChannelDocument } from './definitions/channels';
 
 interface IChannelModel extends Model<IChannelDocument> {
   createChannel(doc: IChannel, userId?: string): IChannelDocument;
@@ -16,10 +11,14 @@ interface IChannelModel extends Model<IChannelDocument> {
 class Channel {
   public static createChannel(doc: IChannel, userId?: string) {
     if (!userId) {
-      throw new Error("userId must be supplied");
+      throw new Error('userId must be supplied');
     }
 
-    return Channels.create({ ...doc, userId });
+    return Channels.create({
+      ...doc,
+      createdAt: new Date(),
+      userId
+    });
   }
 
   public static async updateChannel(_id: string, doc: IChannel) {
@@ -30,18 +29,10 @@ class Channel {
 
   public static async updateUserChannels(channelIds: string[], userId: string) {
     // remove from previous channels
-    await Channels.update(
-      { memberIds: { $in: [userId] } },
-      { $pull: { memberIds: userId } },
-      { multi: true }
-    );
+    await Channels.update({ memberIds: { $in: [userId] } }, { $pull: { memberIds: userId } }, { multi: true });
 
     // add to given channels
-    await Channels.update(
-      { _id: { $in: channelIds } },
-      { $push: { memberIds: userId } },
-      { multi: true }
-    );
+    await Channels.update({ _id: { $in: channelIds } }, { $push: { memberIds: userId } }, { multi: true });
 
     return Channels.find({ _id: { $in: channelIds } });
   }
@@ -51,12 +42,8 @@ class Channel {
   }
 }
 
-channelSchema.plugin(createdAtModifier);
 channelSchema.loadClass(Channel);
 
-const Channels = model<IChannelDocument, IChannelModel>(
-  "channels",
-  channelSchema
-);
+const Channels = model<IChannelDocument, IChannelModel>('channels', channelSchema);
 
 export default Channels;
