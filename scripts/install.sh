@@ -27,7 +27,6 @@ fi
 echo 'Load initial data';
 yarn loadInitialData
 
-
 echo 'Create `.env.sample` from default settings file and configure it on your own:'
 cp .env.sample .env
 
